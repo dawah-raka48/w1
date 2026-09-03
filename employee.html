@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الموظف | نظام التقارير الأسبوعية</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/employee.css">
+</head>
+
+<body>
+
+<div class="employee-container">
+
+    <header class="employee-header">
+
+        <div class="employee-brand">
+            <img src="assets/logo.png" class="logo" alt="Logo">
+
+            <div class="employee-info">
+                <span class="welcome-label">مرحباً بك</span>
+                <h1 id="employeeName">اسم الموظف</h1>
+                <span id="employeeDepartment">القسم</span>
+            </div>
+        </div>
+
+        <div class="employee-meta">
+            <div class="meta-item">
+                <i class="fa-regular fa-calendar"></i>
+                <div>
+                    <small>التاريخ</small>
+                    <strong id="todayDate">--</strong>
+                </div>
+            </div>
+
+            <div class="meta-item">
+                <i class="fa-solid fa-calendar-week"></i>
+                <div>
+                    <small>الأسبوع الحالي</small>
+                    <strong id="weekNumber">--</strong>
+                </div>
+            </div>
+
+            <button id="logoutBtn" class="logout-btn" title="تسجيل الخروج">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>خروج</span>
+            </button>
+        </div>
+
+    </header>
+
+    <main>
+
+        <section class="status-banner" id="uploadNotice" style="display:none;"></section>
+
+        <section id="successCard" class="card success-card" style="display:none;">
+
+            <div class="success-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div class="success-content">
+                <span class="eyebrow">حالة التقرير</span>
+                <h2>تم استلام تقريرك بنجاح</h2>
+                <p>شكراً لك على الالتزام برفع التقرير الأسبوعي.</p>
+                <p>تم إرسال تقرير هذا الأسبوع إلى الإدارة بنجاح.</p>
+                <small>نراك في موعد رفع التقارير القادم.</small>
+            </div>
+
+        </section>
+
+        <section class="dashboard-grid">
+
+            <section id="uploadCard" class="card upload-card">
+
+                <div class="card-heading">
+                    <div class="heading-icon upload-heading-icon">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div>
+                        <span class="eyebrow">التقرير الأسبوعي</span>
+                        <h2>رفع التقرير</h2>
+                        <p>ارفع تقريرك بصيغة PDF خلال الموعد المحدد.</p>
+                    </div>
+                </div>
+
+                <input id="pdfFile" type="file" accept=".pdf,application/pdf" hidden>
+
+                <label class="upload-box" for="pdfFile">
+
+                    <div class="upload-icon">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+
+                    <h3>اختر ملف PDF</h3>
+
+                    <p>اضغط هنا لاختيار التقرير من جهازك</p>
+
+                    <span class="upload-hint">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        ملفات PDF فقط
+                    </span>
+
+                    <div id="selectedFile" class="selected-file">
+                        لم يتم اختيار أي ملف
+                    </div>
+
+                </label>
+
+                <div class="upload-footer">
+
+                    <div class="file-rule">
+                        <i class="fa-solid fa-circle-info"></i>
+                        تأكد من اختيار التقرير الصحيح قبل الرفع.
+                    </div>
+
+                    <button id="uploadBtn" class="primary-btn">
+
+                        <span id="uploadText">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            رفع التقرير
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </section>
+
+            <section class="card reports-card">
+
+                <div class="card-heading">
+                    <div class="heading-icon reports-heading-icon">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <div>
+                        <span class="eyebrow">الأرشيف</span>
+                        <h2>تقاريري السابقة</h2>
+                        <p>يمكنك الرجوع إلى التقارير التي رفعتها سابقاً.</p>
+                    </div>
+                </div>
+
+                <div id="reportsTable" class="reports-list">
+                    <div class="empty">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <span>لا توجد تقارير حتى الآن</span>
+                    </div>
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/employee.js"></script>
+
+</body>
+</html>
