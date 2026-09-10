@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>لوحة الإدارة</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="preconnect" href="https://script.google.com"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="stylesheet" href="css/variables.css"><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/animations.css"><link rel="stylesheet" href="css/admin.css"><link rel="stylesheet" href="css/logout-modal.css">
 </head>
 <body>
@@ -14,5 +14,5 @@
 </div>
 <div class="pdf-modal" id="pdfModal" aria-hidden="true"><div class="pdf-modal-card"><div class="pdf-modal-header"><div><strong id="pdfModalTitle">عرض التقرير</strong><span>التقرير الأسبوعي</span></div><button type="button" class="pdf-close" id="pdfClose" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button></div><iframe id="pdfFrame" title="عرض التقرير" src="about:blank"></iframe></div></div>
 <div class="modal" id="employeeModal"><div class="modal-card"><h2 class="modal-title">إضافة موظف</h2><div class="form-grid"><div class="form-group full"><label>اسم الموظف</label><input id="empName" type="text"></div><div class="form-group"><label>القسم</label><select id="empDepartment"><option value="الإدارية">الإدارية</option><option value="المالية">المالية</option><option value="الإعلام">الإعلام</option><option value="قسم الدعوة">قسم الدعوة</option><option value="الجاليات">الجاليات</option><option value="القسم النسائي">القسم النسائي</option><option value="مركز غيم">مركز غيم</option></select></div><div class="form-group"><label>الصلاحية</label><select id="empRole"><option value="employee">موظف</option><option value="manager">مدير قسم</option><option value="admin">مدير عام</option></select></div><div class="form-group"><label>اسم المستخدم</label><input id="empUsername" type="text"></div><div class="form-group"><label>كلمة المرور</label><input id="empPassword" type="password"></div></div><div class="modal-actions"><button class="cancel-btn" id="closeModal">إلغاء</button><button class="save-btn" id="saveEmployee">حفظ الموظف</button></div></div></div>
-<script src="js/config.js"></script><script src="js/storage.js"></script><script src="js/api.js"></script><script src="js/admin.js"></script><script src="js/logout-modal.js?v=2"></script>
+<script src="js/config.js"></script><script src="js/storage.js"></script><script src="js/api.js?v=2"></script><script src="js/admin.js"></script><script src="js/logout-modal.js?v=2"></script>
 </body></html>
