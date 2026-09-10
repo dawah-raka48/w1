@@ -1,8 +1,8 @@
-const CACHE_NAME = 'weekly-reports-v5';
+const CACHE_NAME = 'weekly-reports-v6';
 const APP_SHELL = [
   './','./index.html','./employee.html','./admin.html','./manager.html',
-  './css/variables.css','./css/theme.css','./css/animations.css','./css/login.css','./css/login-modern.css','./css/employee.css','./css/employee-modern.css','./css/pwa.css',
-  './js/config.js','./js/storage.js','./js/api.js','./js/auth.js','./js/employee.js','./js/pwa.js',
+  './css/variables.css','./css/theme.css','./css/animations.css','./css/login.css','./css/login-modern.css','./css/employee.css','./css/employee-modern.css','./css/dialogs.css','./css/pwa.css',
+  './js/config.js','./js/storage.js','./js/api.js','./js/auth.js','./js/employee.js','./js/dialogs.js','./js/pwa.js',
   './assets/logo.png','./assets/login-bg.svg','./manifest.webmanifest'
 ];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()))});
