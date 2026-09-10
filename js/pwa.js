@@ -8,8 +8,8 @@
   banner.innerHTML = `
     <div class="pwa-install-icon"><img src="assets/logo.png" alt=""></div>
     <div class="pwa-install-content">
-      <strong>ثبّت تطبيق التقارير على جهازك</strong>
-      <span id="pwaInstallHint">تثبيت سريع للوصول إلى النظام من الشاشة الرئيسية</span>
+      <strong>ثبّت تطبيق التقارير</strong>
+      <span id="pwaInstallHint">وصول سريع للنظام من شاشة جهازك</span>
     </div>
     <button id="pwaInstallAction" type="button">تثبيت</button>
     <button id="pwaInstallClose" type="button" aria-label="إغلاق">×</button>`;
@@ -25,18 +25,18 @@
     if (!document.getElementById('pwaInstallBanner')) document.body.appendChild(banner);
   };
 
+  // Android/Chrome: show the notice only when the browser confirms that the app can be installed.
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
     show();
   });
 
+  // iPhone/iPad Safari has no beforeinstallprompt, so show a small instruction notice.
   if (isIOS && isSafari) {
-    hint.textContent = 'اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية» للتثبيت';
+    hint.textContent = 'من Safari اضغط مشاركة ثم «إضافة إلى الشاشة الرئيسية»';
     action.textContent = 'التعليمات';
     setTimeout(show, 900);
-  } else {
-    setTimeout(show, 1200);
   }
 
   action.addEventListener('click', async () => {
