@@ -7,8 +7,23 @@
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="assets/logo.png">
 <link rel="preconnect" href="https://script.google.com"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="stylesheet" href="css/variables.css"><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/animations.css"><link rel="stylesheet" href="css/login.css"><link rel="stylesheet" href="css/login-v6.css?v=1"><link rel="stylesheet" href="css/dialogs.css?v=1"><link rel="stylesheet" href="css/pwa.css?v=3">
+<style>
+#introSplash{position:fixed;inset:0;z-index:99999;background:#fff;display:grid;place-items:center;overflow:hidden;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease}
+#introSplash.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+#introSplash video{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+#introSplash .intro-fallback{position:absolute;inset:0;display:grid;place-items:center;background:#fff;z-index:-1}
+#introSplash .intro-fallback img{width:min(28vw,180px);height:auto;opacity:.92}
+@media (max-width:600px){#introSplash video{object-fit:contain}#introSplash .intro-fallback img{width:42vw;max-width:150px}}
+@media (prefers-reduced-motion:reduce){#introSplash{transition:none}}
+</style>
 </head>
 <body>
+<div id="introSplash" aria-label="مقدمة نظام إدارة التقارير" aria-hidden="false">
+    <div class="intro-fallback"><img src="assets/logo.png" alt=""></div>
+    <video id="introVideo" autoplay muted playsinline preload="auto" poster="assets/logo.png">
+        <source src="assets/    intro.MP4" type="video/mp4">
+    </video>
+</div>
 <div class="login-page">
 <main class="login-card fade-up">
     <div class="card-logo"><img src="assets/logo.png" alt="شعار جمعية الراكه الدعوية"></div>
@@ -31,5 +46,21 @@
     <div class="login-footer">Mohamed Shaaban Fathy Mohamed<br><span>2026</span></div>
 </main>
 </div>
-<script src="js/config.js"></script><script src="js/storage.js"></script><script src="js/api.js?v=2"></script><script src="js/dialogs.js?v=1"></script><script src="js/auth.js?v=2"></script><script src="js/pwa.js?v=3"></script><script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=13').catch(()=>{}));</script>
+<script>
+(function(){
+    const splash=document.getElementById('introSplash');
+    const video=document.getElementById('introVideo');
+    if(!splash||!video)return;
+    let closed=false;
+    const close=()=>{if(closed)return;closed=true;splash.classList.add('is-hidden');setTimeout(()=>splash.remove(),650)};
+    const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduced){close();return;}
+    video.addEventListener('ended',close,{once:true});
+    video.addEventListener('error',()=>setTimeout(close,700),{once:true});
+    setTimeout(close,12000);
+    const play=video.play();
+    if(play&&typeof play.catch==='function')play.catch(()=>setTimeout(close,1500));
+})();
+</script>
+<script src="js/config.js"></script><script src="js/storage.js"></script><script src="js/api.js?v=2"></script><script src="js/dialogs.js?v=1"></script><script src="js/auth.js?v=2"></script><script src="js/pwa.js?v=3"></script><script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=14').catch(()=>{}));</script>
 </body></html>
