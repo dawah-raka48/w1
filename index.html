@@ -8,21 +8,25 @@
 <link rel="preconnect" href="https://script.google.com"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="stylesheet" href="css/variables.css"><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/animations.css"><link rel="stylesheet" href="css/login.css"><link rel="stylesheet" href="css/login-v6.css?v=1"><link rel="stylesheet" href="css/dialogs.css?v=1"><link rel="stylesheet" href="css/pwa.css?v=3">
 <style>
-#introSplash{position:fixed;inset:0;z-index:99999;background:#fff;display:grid;place-items:center;overflow:hidden;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease}
+html,body{margin:0;min-height:100%;background:#0b3156}
+body.intro-active{overflow:hidden}
+#introSplash{position:fixed;inset:0;z-index:99999;width:100vw;height:100dvh;min-height:100svh;background:#0b3156;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease}
 #introSplash.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
-#introSplash video{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
-#introSplash .intro-fallback{position:absolute;inset:0;display:grid;place-items:center;background:#fff;z-index:-1}
+#introSplash video{width:100%;height:100%;object-fit:cover;object-position:center center;display:block;background:#0b3156}
+#introSplash .intro-fallback{position:absolute;inset:0;display:grid;place-items:center;background:#0b3156;z-index:-1}
 #introSplash .intro-fallback img{width:min(28vw,180px);height:auto;opacity:.92}
-@media (max-width:600px){#introSplash video{object-fit:contain}#introSplash .intro-fallback img{width:42vw;max-width:150px}}
+#introSplash .intro-skip{position:absolute;left:18px;bottom:max(18px,env(safe-area-inset-bottom));border:1px solid rgba(255,255,255,.38);background:rgba(0,0,0,.28);color:#fff;border-radius:999px;padding:8px 14px;font:600 13px Cairo,sans-serif;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:.82}
+@media (max-width:600px){#introSplash video{object-fit:cover;object-position:center center}#introSplash .intro-fallback img{width:42vw;max-width:150px}.intro-skip{font-size:12px;left:14px;padding:7px 12px}}
 @media (prefers-reduced-motion:reduce){#introSplash{transition:none}}
 </style>
 </head>
-<body>
+<body class="intro-active">
 <div id="introSplash" aria-label="مقدمة نظام إدارة التقارير" aria-hidden="false">
     <div class="intro-fallback"><img src="assets/logo.png" alt=""></div>
-    <video id="introVideo" autoplay muted playsinline preload="auto" poster="assets/logo.png">
+    <video id="introVideo" autoplay muted playsinline webkit-playsinline preload="auto" poster="assets/logo.png">
         <source src="assets/    intro.MP4" type="video/mp4">
     </video>
+    <button id="introSkip" class="intro-skip" type="button">تخطي</button>
 </div>
 <div class="login-page">
 <main class="login-card fade-up">
@@ -50,17 +54,19 @@
 (function(){
     const splash=document.getElementById('introSplash');
     const video=document.getElementById('introVideo');
+    const skip=document.getElementById('introSkip');
     if(!splash||!video)return;
     let closed=false;
-    const close=()=>{if(closed)return;closed=true;splash.classList.add('is-hidden');setTimeout(()=>splash.remove(),650)};
+    const close=()=>{if(closed)return;closed=true;document.body.classList.remove('intro-active');splash.classList.add('is-hidden');setTimeout(()=>splash.remove(),650)};
     const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(reduced){close();return;}
     video.addEventListener('ended',close,{once:true});
     video.addEventListener('error',()=>setTimeout(close,700),{once:true});
+    skip.addEventListener('click',close);
     setTimeout(close,12000);
     const play=video.play();
     if(play&&typeof play.catch==='function')play.catch(()=>setTimeout(close,1500));
 })();
 </script>
-<script src="js/config.js"></script><script src="js/storage.js"></script><script src="js/api.js?v=2"></script><script src="js/dialogs.js?v=1"></script><script src="js/auth.js?v=2"></script><script src="js/pwa.js?v=3"></script><script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=14').catch(()=>{}));</script>
+<script src="js/config.js"></script><script src="js/storage.js"></script><script src="js/api.js?v=2"></script><script src="js/dialogs.js?v=1"></script><script src="js/auth.js?v=2"></script><script src="js/pwa.js?v=3"></script><script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=15').catch(()=>{}));</script>
 </body></html>
