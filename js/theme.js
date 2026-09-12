@@ -19,16 +19,23 @@
         if(!btn) return;
 
         const icon = btn.querySelector("i");
-        if(icon){
-            icon.className = theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
-        }
-
+        if(icon) icon.className = theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
         btn.setAttribute("aria-label", theme === "dark" ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الداكن");
         btn.setAttribute("title", theme === "dark" ? "الوضع الفاتح" : "الوضع الداكن");
     }
 
+    function setupRefreshButton(){
+        const btn = document.getElementById("homeBtn");
+        if(!btn) return;
+        const icon = btn.querySelector("i");
+        if(icon) icon.className = "fa-solid fa-rotate";
+        btn.setAttribute("aria-label", "تحديث البيانات");
+        btn.setAttribute("title", "تحديث البيانات");
+    }
+
     const initialTheme = getSavedTheme();
     applyTheme(initialTheme);
+    setupRefreshButton();
 
     document.addEventListener("click", function(event){
         const themeBtn = event.target.closest("#themeBtn");
@@ -40,33 +47,30 @@
         }
 
         const refreshBtn = event.target.closest("#homeBtn");
-        if(refreshBtn){
-            const icon = refreshBtn.querySelector("i");
-            if(refreshBtn.dataset.refreshing === "1") return;
+        if(!refreshBtn) return;
+        if(refreshBtn.dataset.refreshing === "1") return;
 
-            refreshBtn.dataset.refreshing = "1";
-            refreshBtn.disabled = true;
-            refreshBtn.setAttribute("aria-label", "جاري التحديث");
-            refreshBtn.setAttribute("title", "جاري التحديث");
-            refreshBtn.classList.add("is-refreshing");
-            if(icon) icon.className = "fa-solid fa-rotate fa-spin";
+        const icon = refreshBtn.querySelector("i");
+        refreshBtn.dataset.refreshing = "1";
+        refreshBtn.disabled = true;
+        refreshBtn.classList.add("is-refreshing");
+        refreshBtn.setAttribute("aria-label", "جاري التحديث");
+        refreshBtn.setAttribute("title", "جاري التحديث");
+        if(icon) icon.className = "fa-solid fa-rotate fa-spin";
 
-            const activeCard = document.querySelector(".menu-card.active");
-            const page = activeCard?.dataset.page || "dashboard";
+        const activeCard = document.querySelector(".menu-card.active");
+        const page = activeCard?.dataset.page || "dashboard";
 
-            try{
-                if(typeof loadPage === "function") loadPage(page);
-            }finally{
-                setTimeout(()=>{
-                    refreshBtn.dataset.refreshing = "0";
-                    refreshBtn.disabled = false;
-                    refreshBtn.classList.remove("is-refreshing");
-                    if(icon) icon.className = "fa-solid fa-rotate";
-                    refreshBtn.setAttribute("aria-label", "تحديث البيانات");
-                    refreshBtn.setAttribute("title", "تحديث البيانات");
-                }, 700);
-            }
-        }
+        if(typeof loadPage === "function") loadPage(page);
+
+        setTimeout(()=>{
+            refreshBtn.dataset.refreshing = "0";
+            refreshBtn.disabled = false;
+            refreshBtn.classList.remove("is-refreshing");
+            if(icon) icon.className = "fa-solid fa-rotate";
+            refreshBtn.setAttribute("aria-label", "تحديث البيانات");
+            refreshBtn.setAttribute("title", "تحديث البيانات");
+        }, 900);
     });
 
     window.addEventListener("storage", function(event){
