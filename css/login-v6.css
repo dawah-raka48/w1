@@ -2,7 +2,7 @@
 *{box-sizing:border-box}
 html,body{margin:0!important;min-height:100%;font-family:Cairo,sans-serif!important}
 body{background:#102b75!important;overflow-x:hidden!important}
-.login-page{position:relative!important;width:100%!important;min-height:100svh!important;height:100svh!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:28px 20px!important;overflow:hidden!important;background:#102b75 url('../assets/lm2.JPEG') center/cover no-repeat!important}
+.login-page{position:relative!important;width:100%!important;min-height:100svh!important;height:100svh!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:28px 20px!important;overflow:hidden!important;background:#102b75 url('../assets/lm2.png') center/cover no-repeat!important}
 .login-page:before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(7,43,103,.22),rgba(10,39,100,.12));pointer-events:none}
 .login-page>.login-brand,.login-page>.side-panel,.login-page>.decor,.mobile-brand-head,.brand-content,.top-badge{display:none!important}
 .login-card{position:relative!important;z-index:2!important;width:min(500px,100%)!important;max-height:calc(100svh - 40px)!important;overflow:auto!important;margin:auto!important;display:flex!important;flex-direction:column!important;align-items:center!important;background:rgba(255,255,255,.985)!important;border:1px solid rgba(255,255,255,.95)!important;border-radius:30px!important;padding:30px 48px 22px!important;box-shadow:0 28px 90px rgba(0,0,0,.3)!important;color:#102d4b!important;scrollbar-width:none!important}
