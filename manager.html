@@ -9,10 +9,11 @@
 .header-action-btn{width:46px;height:46px;min-width:46px;padding:0;border-radius:14px;border:0;background:var(--surface-2);color:var(--primary);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);font:inherit}
 .header-action-btn:hover{background:var(--primary);color:#fff;transform:translateY(-2px)}
 .header-action-btn:disabled{opacity:.65;cursor:wait;transform:none}
-.header-action-btn.is-refreshing i{animation:managerRefresh .7s linear infinite}
+.header-action-btn.is-refreshing{cursor:wait!important}
+.header-action-btn.is-refreshing i{display:inline-block!important;animation:managerRefreshSpin .8s linear infinite!important;transform-origin:center center!important}
 .header-action-btn.logout-action{background:#FEF2F2;color:#DC2626}
 .header-action-btn.logout-action:hover{background:#DC2626;color:#fff}
-@keyframes managerRefresh{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes managerRefreshSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @media(max-width:900px){.header-actions{width:100%;justify-content:flex-end}.header-action-btn{width:44px;height:44px;min-width:44px}}
 </style>
 </head>
@@ -27,12 +28,18 @@
 <script>
 document.getElementById('refreshBtn')?.addEventListener('click',async function(){
     if(this.disabled)return;
-    this.disabled=true;this.classList.add('is-refreshing');
+    const btn=this;
+    btn.disabled=true;
+    btn.classList.add('is-refreshing');
     try{
         const active=document.querySelector('.menu-card.active')?.dataset.page||'dashboard';
         if(typeof loadPage==='function') await loadPage(active);
-        else location.reload();
-    }finally{this.disabled=false;this.classList.remove('is-refreshing');}
+        else await new Promise(r=>setTimeout(r,500));
+    }catch(err){console.error(err)}
+    finally{
+        btn.classList.remove('is-refreshing');
+        btn.disabled=false;
+    }
 });
 </script>
 </body></html>
