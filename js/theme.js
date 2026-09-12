@@ -1,6 +1,6 @@
 /* ==========================================
    Weekly Reports System
-   Theme Switcher
+   Theme Switcher + Refresh Button
 ========================================== */
 (function(){
     const STORAGE_KEY = "weeklyReportsTheme";
@@ -31,12 +31,42 @@
     applyTheme(initialTheme);
 
     document.addEventListener("click", function(event){
-        const btn = event.target.closest("#themeBtn");
-        if(!btn) return;
+        const themeBtn = event.target.closest("#themeBtn");
+        if(themeBtn){
+            const nextTheme = document.body.classList.contains("dark") ? "light" : "dark";
+            localStorage.setItem(STORAGE_KEY, nextTheme);
+            applyTheme(nextTheme);
+            return;
+        }
 
-        const nextTheme = document.body.classList.contains("dark") ? "light" : "dark";
-        localStorage.setItem(STORAGE_KEY, nextTheme);
-        applyTheme(nextTheme);
+        const refreshBtn = event.target.closest("#homeBtn");
+        if(refreshBtn){
+            const icon = refreshBtn.querySelector("i");
+            if(refreshBtn.dataset.refreshing === "1") return;
+
+            refreshBtn.dataset.refreshing = "1";
+            refreshBtn.disabled = true;
+            refreshBtn.setAttribute("aria-label", "جاري التحديث");
+            refreshBtn.setAttribute("title", "جاري التحديث");
+            refreshBtn.classList.add("is-refreshing");
+            if(icon) icon.className = "fa-solid fa-rotate fa-spin";
+
+            const activeCard = document.querySelector(".menu-card.active");
+            const page = activeCard?.dataset.page || "dashboard";
+
+            try{
+                if(typeof loadPage === "function") loadPage(page);
+            }finally{
+                setTimeout(()=>{
+                    refreshBtn.dataset.refreshing = "0";
+                    refreshBtn.disabled = false;
+                    refreshBtn.classList.remove("is-refreshing");
+                    if(icon) icon.className = "fa-solid fa-rotate";
+                    refreshBtn.setAttribute("aria-label", "تحديث البيانات");
+                    refreshBtn.setAttribute("title", "تحديث البيانات");
+                }, 700);
+            }
+        }
     });
 
     window.addEventListener("storage", function(event){
