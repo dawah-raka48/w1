@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0b3156">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="التقارير التنفيذي">
-<title>مركز التقارير التنفيذي</title>
+<meta name="apple-mobile-web-app-title" content="مركز التقارير لموظفو الجمعية">
+<title>مركز التقارير لموظفو الجمعية</title>
 <link rel="manifest" href="manifest-executive.webmanifest">
 <link rel="apple-touch-icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
 <body>
 <div class="executive-app">
 <header class="executive-header">
-  <div class="header-brand"><img src="assets/logo.png" alt="شعار الجمعية"><div><strong>مركز التقارير التنفيذي</strong><span>عرض ومتابعة تقارير جميع الأقسام</span></div></div>
+  <div class="header-brand"><img src="assets/logo.png" alt="شعار الجمعية"><div><strong>مركز التقارير لموظفو الجمعية</strong><span>عرض ومتابعة تقارير جميع الأقسام</span></div></div>
   <div class="header-actions"><button id="refreshBtn" title="تحديث"><i class="fa-solid fa-rotate"></i></button><button id="themeBtn" title="الوضع الداكن"><i class="fa-solid fa-moon"></i></button></div>
 </header>
 <main class="executive-main">
@@ -28,7 +28,7 @@
   <div class="period-switch"><button class="period-btn active" data-period="week"><i class="fa-solid fa-calendar-week"></i> الأسبوع</button><button class="period-btn" data-period="month"><i class="fa-solid fa-calendar-days"></i> الشهر</button><button class="period-btn" data-period="all"><i class="fa-solid fa-layer-group"></i> الكل</button></div>
   <div class="filters-grid"><label><span>الفترة</span><select id="periodValue"><option value="">كل الفترات</option></select></label><label><span>القسم</span><select id="departmentFilter"><option value="">كل الأقسام</option></select></label><label class="search-field"><span>بحث</span><div><i class="fa-solid fa-magnifying-glass"></i><input id="searchFilter" placeholder="اسم الموظف أو اسم التقرير"></div></label></div>
 </section>
-<section class="summary-row"><div class="summary-card"><i class="fa-solid fa-file-pdf"></i><div><span>التقارير</span><strong id="totalReports">0</strong></div></div><div class="summary-card"><i class="fa-solid fa-building"></i><div><span>الأقسام</span><strong id="totalDepartments">0</strong></div></div><div class="summary-card"><i class="fa-solid fa-users"></i><div><span>الموظفون</span><strong id="totalEmployees">0</strong></div></section>
+<section class="summary-row"><div class="summary-card"><i class="fa-solid fa-file-pdf"></i><div><span>التقارير</span><strong id="totalReports">0</strong></div></div><div class="summary-card"><i class="fa-solid fa-building"></i><div><span>الأقسام</span><strong id="totalDepartments">0</strong></div></div><div class="summary-card"><i class="fa-solid fa-users"></i><div><span>الموظفون</span><strong id="totalEmployees">0</strong></div></div></section>
 <section id="departmentsView" class="departments-view"><div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> جارٍ تحميل التقارير...</div></section>
 </main>
 </div>
