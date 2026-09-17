@@ -1,8 +1,3 @@
-const executiveUser=JSON.parse(localStorage.getItem('currentUser')||'null');
-if(!executiveUser){location.replace('index.html');throw new Error('No current user');}
-const executiveRole=String(executiveUser.role||'').normalize('NFKC').toLowerCase();
-if(!['admin','مدير عام','مديرعام'].includes(executiveRole)){location.replace('index.html');throw new Error('Not authorized');}
-
 const state={reports:[],period:'week',filtered:[]};
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -13,65 +8,14 @@ function previewUrl(url){const v=String(url||'');const m=v.match(/\/file\/d\/([^
 function openReport(url,title,meta){const modal=$('reportModal'),frame=$('reportFrame');$('reportModalTitle').textContent=title||'عرض التقرير';$('reportModalMeta').textContent=meta||'التقرير الأسبوعي';frame.src=previewUrl(url);modal.classList.add('show');modal.setAttribute('aria-hidden','false');}
 function closeReport(){const modal=$('reportModal');modal.classList.remove('show');modal.setAttribute('aria-hidden','true');$('reportFrame').src='about:blank';}
 window.openReport=openReport;
-
 function weekKey(r){return String(r.week||'').trim();}
 function reportDate(r){return dateOf(r.uploadDate||r.date||r.createdAt);}
-function weekNumber(v){
- const m=norm(v).match(/(?:الأسبوع|اسبوع)\s*(?:ال)?(الأول|الاول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+)/);
- if(!m)return null;
- const map={الأول:1,الاول:1,الثاني:2,الثالث:3,الرابع:4,الخامس:5,السادس:6,السابع:7,الثامن:8,التاسع:9,العاشر:10};
- return map[m[1]]||Number(m[1])||null;
-}
-function periodOptions(){
- const select=$('periodValue');select.innerHTML='<option value="">كل الفترات</option>';
- const values=[...new Set(state.reports.map(r=>weekKey(r)).filter(Boolean))];
- if(state.period==='week'){
-   values.sort((a,b)=>{
-     const na=weekNumber(a),nb=weekNumber(b);
-     if(na!==null&&nb!==null&&na!==nb)return nb-na;
-     const da=state.reports.find(r=>weekKey(r)===a),db=state.reports.find(r=>weekKey(r)===b);
-     return (reportDate(db)?.getTime()||0)-(reportDate(da)?.getTime()||0);
-   });
- } else if(state.period==='month'){
-   const months=new Map();state.reports.forEach(r=>{const d=reportDate(r);if(d)months.set(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,d.toLocaleDateString('ar-SA',{year:'numeric',month:'long'}));});
-   [...months.entries()].sort((a,b)=>b[0].localeCompare(a[0])).forEach(([v,t])=>select.insertAdjacentHTML('beforeend',`<option value="${esc(v)}">${esc(t)}</option>`));return;
- }
- values.forEach(v=>select.insertAdjacentHTML('beforeend',`<option value="${esc(v)}">${esc(v)}</option>`));
-}
-function departmentOptions(){
- const select=$('departmentFilter');const current=select.value;const deps=[...new Set(state.reports.map(r=>String(r.department||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
- select.innerHTML='<option value="">كل الأقسام</option>'+deps.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');select.value=current;
-}
-function applyFilters(){
- const q=norm($('searchFilter').value), dep=norm($('departmentFilter').value), val=$('periodValue').value;
- state.filtered=state.reports.filter(r=>{
-   const d=reportDate(r), text=norm(`${r.employeeName||''} ${r.fileName||''} ${r.week||''} ${r.department||''}`);
-   const matchQ=!q||text.includes(q),matchDep=!dep||norm(r.department)===dep;
-   let matchPeriod=true;
-   if(val){if(state.period==='month')matchPeriod=!!d&&`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===val;else matchPeriod=weekKey(r)===val;}
-   return matchQ&&matchDep&&matchPeriod;
- });
- render();
-}
-function groupData(){
- const map=new Map();
- state.filtered.forEach(r=>{const dep=String(r.department||'غير محدد').trim()||'غير محدد';if(!map.has(dep))map.set(dep,new Map());const employees=map.get(dep);const id=String(r.employeeId||r.employeeName||'unknown').trim();if(!employees.has(id))employees.set(id,{name:r.employeeName||'موظف',reports:[]});employees.get(id).reports.push(r);});
- return [...map.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ar'));
-}
-function render(){
- $('totalReports').textContent=state.filtered.length;$('totalDepartments').textContent=new Set(state.filtered.map(r=>String(r.department||'').trim()).filter(Boolean)).size;$('totalEmployees').textContent=new Set(state.filtered.map(r=>String(r.employeeId||r.employeeName||'').trim()).filter(Boolean)).size;
- const groups=groupData();
- $('departmentsView').innerHTML=groups.length?groups.map(([dep,employees])=>`<section class="department-card"><button class="department-head" type="button" onclick="this.parentElement.classList.toggle('open')"><div class="department-title"><span class="department-icon"><i class="fa-solid fa-building"></i></span><div><strong>${esc(dep)}</strong><span>${employees.size} موظف · ${[...employees.values()].reduce((n,e)=>n+e.reports.length,0)} تقرير</span></div></div><i class="fa-solid fa-chevron-down dept-arrow"></i></button><div class="employees-list">${[...employees.values()].sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(e=>`<article class="employee-report"><button class="employee-head" type="button" onclick="this.parentElement.classList.toggle('expanded')"><div class="avatar"><i class="fa-solid fa-user"></i></div><div class="employee-main"><strong>${esc(e.name)}</strong><span>${e.reports.length} تقرير</span></div><i class="fa-solid fa-chevron-down employee-arrow"></i></button><div class="employee-reports">${e.reports.sort((a,b)=>(reportDate(b)?.getTime()||0)-(reportDate(a)?.getTime()||0)).map(r=>`<button class="report-item" type="button" onclick='openReport(${JSON.stringify(String(r.url||''))},${JSON.stringify('تقرير '+String(r.employeeName||''))},${JSON.stringify(String(r.week||formatDate(r.uploadDate)||''))})'><span class="report-icon"><i class="fa-solid fa-file-pdf"></i></span><span class="report-info"><strong>${esc(r.week||'تقرير أسبوعي')}</strong><small>${esc(r.fileName||'ملف التقرير')} · ${esc(formatDate(r.uploadDate))}</small></span><span class="view-report"><i class="fa-solid fa-eye"></i></span></button>`).join('')}</div></article>`).join('')}</div></section>`).join(''):`<div class="empty-state"><i class="fa-solid fa-folder-open"></i><strong>لا توجد تقارير مطابقة</strong><span>غيّر الفلاتر أو الفترة المختارة.</span></div>`;
-}
-async function load(){
- $('departmentsView').innerHTML='<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> جارٍ تحميل التقارير...</div>';
- try{const result=await api('getReports');if(!result?.success)throw new Error(result?.message||'تعذر تحميل التقارير');state.reports=Array.isArray(result.reports)?result.reports:[];departmentOptions();periodOptions();applyFilters();}
- catch(e){console.error(e);$('departmentsView').innerHTML=`<div class="empty-state error"><i class="fa-solid fa-triangle-exclamation"></i><strong>تعذر تحميل التقارير</strong><span>${esc(e.message||e)}</span></div>`;}
-}
-
+function weekNumber(v){const m=norm(v).match(/(?:الأسبوع|اسبوع)\s*(?:ال)?(الأول|الاول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+)/);if(!m)return null;const map={الأول:1,الاول:1,الثاني:2,الثالث:3,الرابع:4,الخامس:5,السادس:6,السابع:7,الثامن:8,التاسع:9,العاشر:10};return map[m[1]]||Number(m[1])||null;}
+function periodOptions(){const select=$('periodValue');select.innerHTML='<option value="">كل الفترات</option>';const values=[...new Set(state.reports.map(r=>weekKey(r)).filter(Boolean))];if(state.period==='week'){values.sort((a,b)=>{const na=weekNumber(a),nb=weekNumber(b);if(na!==null&&nb!==null&&na!==nb)return nb-na;const da=state.reports.find(r=>weekKey(r)===a),db=state.reports.find(r=>weekKey(r)===b);return(reportDate(db)?.getTime()||0)-(reportDate(da)?.getTime()||0);});}else if(state.period==='month'){const months=new Map();state.reports.forEach(r=>{const d=reportDate(r);if(d)months.set(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,d.toLocaleDateString('ar-SA',{year:'numeric',month:'long'}));});[...months.entries()].sort((a,b)=>b[0].localeCompare(a[0])).forEach(([v,t])=>select.insertAdjacentHTML('beforeend',`<option value="${esc(v)}">${esc(t)}</option>`));return;}values.forEach(v=>select.insertAdjacentHTML('beforeend',`<option value="${esc(v)}">${esc(v)}</option>`));}
+function departmentOptions(){const select=$('departmentFilter');const current=select.value;const deps=[...new Set(state.reports.map(r=>String(r.department||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));select.innerHTML='<option value="">كل الأقسام</option>'+deps.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');select.value=current;}
+function applyFilters(){const q=norm($('searchFilter').value),dep=norm($('departmentFilter').value),val=$('periodValue').value;state.filtered=state.reports.filter(r=>{const d=reportDate(r),text=norm(`${r.employeeName||''} ${r.fileName||''} ${r.week||''} ${r.department||''}`);const matchQ=!q||text.includes(q),matchDep=!dep||norm(r.department)===dep;let matchPeriod=true;if(val){if(state.period==='month')matchPeriod=!!d&&`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`===val;else matchPeriod=weekKey(r)===val;}return matchQ&&matchDep&&matchPeriod;});render();}
+function groupData(){const map=new Map();state.filtered.forEach(r=>{const dep=String(r.department||'غير محدد').trim()||'غير محدد';if(!map.has(dep))map.set(dep,new Map());const employees=map.get(dep),id=String(r.employeeId||r.employeeName||'unknown').trim();if(!employees.has(id))employees.set(id,{name:r.employeeName||'موظف',reports:[]});employees.get(id).reports.push(r);});return[...map.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ar'));}
+function render(){$('totalReports').textContent=state.filtered.length;$('totalDepartments').textContent=new Set(state.filtered.map(r=>String(r.department||'').trim()).filter(Boolean)).size;$('totalEmployees').textContent=new Set(state.filtered.map(r=>String(r.employeeId||r.employeeName||'').trim()).filter(Boolean)).size;const groups=groupData();$('departmentsView').innerHTML=groups.length?groups.map(([dep,employees])=>`<section class="department-card"><button class="department-head" type="button" onclick="this.parentElement.classList.toggle('open')"><div class="department-title"><span class="department-icon"><i class="fa-solid fa-building"></i></span><div><strong>${esc(dep)}</strong><span>${employees.size} موظف · ${[...employees.values()].reduce((n,e)=>n+e.reports.length,0)} تقرير</span></div></div><i class="fa-solid fa-chevron-down dept-arrow"></i></button><div class="employees-list">${[...employees.values()].sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(e=>`<article class="employee-report"><button class="employee-head" type="button" onclick="this.parentElement.classList.toggle('expanded')"><div class="avatar"><i class="fa-solid fa-user"></i></div><div class="employee-main"><strong>${esc(e.name)}</strong><span>${e.reports.length} تقرير</span></div><i class="fa-solid fa-chevron-down employee-arrow"></i></button><div class="employee-reports">${e.reports.sort((a,b)=>(reportDate(b)?.getTime()||0)-(reportDate(a)?.getTime()||0)).map(r=>`<button class="report-item" type="button" onclick='openReport(${JSON.stringify(String(r.url||''))},${JSON.stringify('تقرير '+String(r.employeeName||''))},${JSON.stringify(String(r.week||formatDate(r.uploadDate)||''))})'><span class="report-icon"><i class="fa-solid fa-file-pdf"></i></span><span class="report-info"><strong>${esc(r.week||'تقرير أسبوعي')}</strong><small>${esc(r.fileName||'ملف التقرير')} · ${esc(formatDate(r.uploadDate))}</small></span><span class="view-report"><i class="fa-solid fa-eye"></i></span></button>`).join('')}</div></article>`).join('')}</div></section>`).join(''):`<div class="empty-state"><i class="fa-solid fa-folder-open"></i><strong>لا توجد تقارير مطابقة</strong><span>غيّر الفلاتر أو الفترة المختارة.</span></div>`;}
+async function load(){$('departmentsView').innerHTML='<div class="loading"><i class="fa-solid fa-spinner fa-spin"></i> جارٍ تحميل التقارير...</div>';try{const result=await api('getReports');if(!result?.success)throw new Error(result?.message||'تعذر تحميل التقارير');state.reports=Array.isArray(result.reports)?result.reports:[];departmentOptions();periodOptions();applyFilters();}catch(e){console.error(e);$('departmentsView').innerHTML=`<div class="empty-state error"><i class="fa-solid fa-triangle-exclamation"></i><strong>تعذر تحميل التقارير</strong><span>${esc(e.message||e)}</span></div>`;}}
 document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('active'));btn.classList.add('active');state.period=btn.dataset.period;periodOptions();$('periodValue').value='';applyFilters();}));
-$('periodValue').addEventListener('change',applyFilters);$('departmentFilter').addEventListener('change',applyFilters);$('searchFilter').addEventListener('input',applyFilters);
-$('clearFilters').addEventListener('click',()=>{$('searchFilter').value='';$('departmentFilter').value='';$('periodValue').value='';applyFilters();});
-$('refreshBtn').addEventListener('click',()=>load());$('homeBtn').addEventListener('click',()=>location.href='admin.html');$('logoutBtn').addEventListener('click',()=>{localStorage.removeItem('currentUser');location.replace('index.html');});
-$('closeReport').addEventListener('click',closeReport);$('reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')closeReport();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReport();});
-load();
+$('periodValue').addEventListener('change',applyFilters);$('departmentFilter').addEventListener('change',applyFilters);$('searchFilter').addEventListener('input',applyFilters);$('clearFilters').addEventListener('click',()=>{$('searchFilter').value='';$('departmentFilter').value='';$('periodValue').value='';applyFilters();});$('refreshBtn').addEventListener('click',load);$('logoutBtn').addEventListener('click',()=>{localStorage.removeItem('currentUser');location.replace('index.html');});$('closeReport').addEventListener('click',closeReport);$('reportModal').addEventListener('click',e=>{if(e.target.id==='reportModal')closeReport();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReport();});load();
