@@ -4,17 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b3156">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="التقارير التنفيذي">
 <title>مركز التقارير التنفيذي</title>
+<link rel="manifest" href="manifest-executive.webmanifest">
+<link rel="apple-touch-icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-<link rel="stylesheet" href="css/variables.css"><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/executive-reports.css?v=1">
+<link rel="stylesheet" href="css/variables.css"><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/executive-reports.css?v=2"><link rel="stylesheet" href="css/pwa.css?v=3">
 </head>
 <body>
 <div class="executive-app">
 <header class="executive-header">
   <div class="header-brand"><img src="assets/logo.png" alt="شعار الجمعية"><div><strong>مركز التقارير التنفيذي</strong><span>عرض ومتابعة تقارير جميع الأقسام</span></div></div>
-  <div class="header-actions"><button id="homeBtn" title="لوحة المدير العام"><i class="fa-solid fa-house"></i></button><button id="refreshBtn" title="تحديث"><i class="fa-solid fa-rotate"></i></button><button id="themeBtn" title="الوضع الداكن"><i class="fa-solid fa-moon"></i></button><button id="logoutBtn" title="تسجيل الخروج"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+  <div class="header-actions"><button id="refreshBtn" title="تحديث"><i class="fa-solid fa-rotate"></i></button><button id="themeBtn" title="الوضع الداكن"><i class="fa-solid fa-moon"></i></button></div>
 </header>
 <main class="executive-main">
 <section class="hero"><div><span class="eyebrow">متابعة تنفيذية</span><h1>التقارير الشهرية والأسبوعية</h1><p>اختر الفترة والقسم والموظف، ثم افتح التقرير مباشرة داخل المنصة.</p></div><div class="hero-icon"><i class="fa-solid fa-file-circle-check"></i></div></section>
@@ -28,53 +33,6 @@
 </main>
 </div>
 <div class="report-modal" id="reportModal" aria-hidden="true"><div class="report-modal-card"><div class="report-modal-header"><div><strong id="reportModalTitle">عرض التقرير</strong><span id="reportModalMeta">التقرير</span></div><button id="closeReport" title="إغلاق"><i class="fa-solid fa-xmark"></i></button></div><iframe id="reportFrame" title="عرض التقرير" src="about:blank"></iframe></div></div>
-<script src="js/config.js"></script><script src="js/api.js?v=2"></script><script src="js/executive-reports.js?v=1"></script><script src="js/theme.js?v=1"></script>
-<script>
-/* ترتيب الفترات: أحدث شهر أولاً، وداخل كل شهر أحدث أسبوع أولاً */
-(function(){
-  const monthOrder={
-    'يناير':1,'فبراير':2,'مارس':3,'أبريل':4,'ابريل':4,'مايو':5,'يونيو':6,
-    'يوليو':7,'أغسطس':8,'اغسطس':8,'سبتمبر':9,'أكتوبر':10,'اكتوبر':10,'نوفمبر':11,'ديسمبر':12
-  };
-  const weekOrder={
-    'الأول':1,'الاول':1,'الثاني':2,'الثالث':3,'الرابع':4,'الخامس':5,
-    'السادس':6,'السابع':7,'الثامن':8,'التاسع':9,'العاشر':10
-  };
-  function numberFromWeek(text){
-    const s=String(text||'');
-    const m=s.match(/(?:الأسبوع|اسبوع)\s*(?:ال)?(الأول|الاول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+)/i);
-    if(!m)return 0;
-    return weekOrder[m[1]]||Number(m[1])||0;
-  }
-  function monthFromText(text){
-    const s=String(text||'');
-    for(const name of Object.keys(monthOrder)) if(s.includes(name)) return {name,num:monthOrder[name]};
-    return {name:'',num:0};
-  }
-  function yearFromText(text){
-    const m=String(text||'').match(/(20\d{2})/);return m?Number(m[1]):0;
-  }
-  function sortWeekOptions(){
-    const select=document.getElementById('periodValue');
-    if(!select)return;
-    const first=select.querySelector('option[value=""]');
-    const options=[...select.options].filter(o=>o.value!=='');
-    options.sort((a,b)=>{
-      const ma=monthFromText(a.textContent),mb=monthFromText(b.textContent);
-      const ya=yearFromText(a.textContent),yb=yearFromText(b.textContent);
-      if(ya!==yb)return yb-ya;
-      if(ma.num!==mb.num)return mb.num-ma.num;
-      const wa=numberFromWeek(a.textContent),wb=numberFromWeek(b.textContent);
-      if(wa!==wb)return wb-wa;
-      return String(b.textContent).localeCompare(String(a.textContent),'ar');
-    });
-    if(first)select.appendChild(first);
-    options.forEach(o=>select.appendChild(o));
-  }
-  document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{
-    if(btn.dataset.period==='week')setTimeout(sortWeekOptions,0);
-  }));
-  setTimeout(sortWeekOptions,50);
-})();
-</script>
+<script src="js/config.js"></script><script src="js/api.js?v=2"></script><script src="js/executive-reports.js?v=2"></script><script src="js/theme.js?v=1"></script><script src="js/pwa.js?v=4"></script>
+<script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js?v=22').catch(()=>{}));</script>
 </body></html>
