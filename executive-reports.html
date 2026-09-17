@@ -29,4 +29,52 @@
 </div>
 <div class="report-modal" id="reportModal" aria-hidden="true"><div class="report-modal-card"><div class="report-modal-header"><div><strong id="reportModalTitle">عرض التقرير</strong><span id="reportModalMeta">التقرير</span></div><button id="closeReport" title="إغلاق"><i class="fa-solid fa-xmark"></i></button></div><iframe id="reportFrame" title="عرض التقرير" src="about:blank"></iframe></div></div>
 <script src="js/config.js"></script><script src="js/api.js?v=2"></script><script src="js/executive-reports.js?v=1"></script><script src="js/theme.js?v=1"></script>
+<script>
+/* ترتيب الفترات: أحدث شهر أولاً، وداخل كل شهر أحدث أسبوع أولاً */
+(function(){
+  const monthOrder={
+    'يناير':1,'فبراير':2,'مارس':3,'أبريل':4,'ابريل':4,'مايو':5,'يونيو':6,
+    'يوليو':7,'أغسطس':8,'اغسطس':8,'سبتمبر':9,'أكتوبر':10,'اكتوبر':10,'نوفمبر':11,'ديسمبر':12
+  };
+  const weekOrder={
+    'الأول':1,'الاول':1,'الثاني':2,'الثالث':3,'الرابع':4,'الخامس':5,
+    'السادس':6,'السابع':7,'الثامن':8,'التاسع':9,'العاشر':10
+  };
+  function numberFromWeek(text){
+    const s=String(text||'');
+    const m=s.match(/(?:الأسبوع|اسبوع)\s*(?:ال)?(الأول|الاول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+)/i);
+    if(!m)return 0;
+    return weekOrder[m[1]]||Number(m[1])||0;
+  }
+  function monthFromText(text){
+    const s=String(text||'');
+    for(const name of Object.keys(monthOrder)) if(s.includes(name)) return {name,num:monthOrder[name]};
+    return {name:'',num:0};
+  }
+  function yearFromText(text){
+    const m=String(text||'').match(/(20\d{2})/);return m?Number(m[1]):0;
+  }
+  function sortWeekOptions(){
+    const select=document.getElementById('periodValue');
+    if(!select)return;
+    const first=select.querySelector('option[value=""]');
+    const options=[...select.options].filter(o=>o.value!=='');
+    options.sort((a,b)=>{
+      const ma=monthFromText(a.textContent),mb=monthFromText(b.textContent);
+      const ya=yearFromText(a.textContent),yb=yearFromText(b.textContent);
+      if(ya!==yb)return yb-ya;
+      if(ma.num!==mb.num)return mb.num-ma.num;
+      const wa=numberFromWeek(a.textContent),wb=numberFromWeek(b.textContent);
+      if(wa!==wb)return wb-wa;
+      return String(b.textContent).localeCompare(String(a.textContent),'ar');
+    });
+    if(first)select.appendChild(first);
+    options.forEach(o=>select.appendChild(o));
+  }
+  document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    if(btn.dataset.period==='week')setTimeout(sortWeekOptions,0);
+  }));
+  setTimeout(sortWeekOptions,50);
+})();
+</script>
 </body></html>
