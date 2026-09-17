@@ -16,11 +16,23 @@ window.openReport=openReport;
 
 function weekKey(r){return String(r.week||'').trim();}
 function reportDate(r){return dateOf(r.uploadDate||r.date||r.createdAt);}
+function weekNumber(v){
+ const m=norm(v).match(/(?:الأسبوع|اسبوع)\s*(?:ال)?(الأول|الاول|الثاني|الثالث|الرابع|الخامس|السادس|السابع|الثامن|التاسع|العاشر|\d+)/);
+ if(!m)return null;
+ const map={الأول:1,الاول:1,الثاني:2,الثالث:3,الرابع:4,الخامس:5,السادس:6,السابع:7,الثامن:8,التاسع:9,العاشر:10};
+ return map[m[1]]||Number(m[1])||null;
+}
 function periodOptions(){
  const select=$('periodValue');select.innerHTML='<option value="">كل الفترات</option>';
  const values=[...new Set(state.reports.map(r=>weekKey(r)).filter(Boolean))];
- if(state.period==='week') values.sort((a,b)=>norm(b).localeCompare(norm(a),'ar'));
- else if(state.period==='month'){
+ if(state.period==='week'){
+   values.sort((a,b)=>{
+     const na=weekNumber(a),nb=weekNumber(b);
+     if(na!==null&&nb!==null&&na!==nb)return nb-na;
+     const da=state.reports.find(r=>weekKey(r)===a),db=state.reports.find(r=>weekKey(r)===b);
+     return (reportDate(db)?.getTime()||0)-(reportDate(da)?.getTime()||0);
+   });
+ } else if(state.period==='month'){
    const months=new Map();state.reports.forEach(r=>{const d=reportDate(r);if(d)months.set(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,d.toLocaleDateString('ar-SA',{year:'numeric',month:'long'}));});
    [...months.entries()].sort((a,b)=>b[0].localeCompare(a[0])).forEach(([v,t])=>select.insertAdjacentHTML('beforeend',`<option value="${esc(v)}">${esc(t)}</option>`));return;
  }
