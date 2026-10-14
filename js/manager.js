@@ -60,7 +60,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closePdf();});
 const menuCards=document.querySelectorAll(".menu-card");
 menuCards.forEach(card=>card.addEventListener("click",()=>{menuCards.forEach(x=>x.classList.remove("active"));card.classList.add("active");loadPage(card.dataset.page);}));
 
-function loadPage(page){switch(page){case "employees":return employeesPage();case "reports":return reportsPage();default:return dashboardPage();}}
+function loadPage(page){if(window.renderManagerReportsHome)return window.renderManagerReportsHome();switch(page){case "employees":return employeesPage();case "reports":return reportsPage();default:return dashboardPage();}}
 
 async function getDepartmentData(){
     const [er,rr]=await Promise.all([
@@ -138,5 +138,5 @@ async function reportsPage(){
 }
 
 menuCards.forEach(x=>x.classList.remove("active"));
-document.querySelector('[data-page="dashboard"]')?.classList.add("active");
-dashboardPage();
+document.querySelector('[data-page="reports"]')?.classList.add("active");
+setTimeout(()=>window.renderManagerReportsHome?.(),250);
