@@ -24,6 +24,21 @@
 <main>
 <section class="welcome-card"><div class="welcome-copy"><span class="eyebrow">لوحة الموظف</span><h2>مرحبًا بك 👋</h2><p>ارفع تقريرك الأسبوعي، وتابع جميع تقاريرك السابقة من مكان واحد.</p></div><span class="upload-state" id="uploadState"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق</span></section>
 <section class="employee-stats"><div class="stat-card blue"><div class="stat-copy"><small>إجمالي التقارير</small><strong id="totalReports">0</strong></div><span class="stat-icon"><i class="fa-solid fa-folder"></i></span></div><div class="stat-card green"><div class="stat-copy"><small>حالة هذا الأسبوع</small><strong id="weeklyStatus">جاري التحقق</strong></div><span class="stat-icon"><i class="fa-solid fa-circle-check"></i></span></div><div class="stat-card gold"><div class="stat-copy"><small>آخر رفع</small><strong id="lastUpload">لا يوجد</strong></div><span class="stat-icon"><i class="fa-solid fa-clock-rotate-left"></i></span></div></section>
+
+<section class="card weekly-leaderboard" id="weeklyLeaderboard" aria-live="polite"><div class="card-heading"><div class="heading-icon" style="background:#fff7df;color:#c58b16"><i class="fa-solid fa-trophy"></i></div><div><span class="eyebrow">إنجازات هذا الأسبوع</span><h2>أسرع 3 موظفين في رفع التقرير</h2><p id="leaderboardWeek">ترتيب جميع موظفي الجمعية</p></div></div><div id="weeklyLeaderboardList" class="weekly-leaderboard-list"><div class="empty"><i class="fa-solid fa-spinner fa-spin"></i><span>جاري تحميل الترتيب...</span></div></div></section>
+<style>
+.weekly-leaderboard{margin:18px 0 22px;padding:20px;border-radius:18px;background:linear-gradient(135deg,#fff 0%,#f7f9ff 100%);border:1px solid #e7ebf4;box-shadow:0 8px 24px rgba(20,45,85,.06)}
+.weekly-leaderboard .card-heading{margin-bottom:14px}
+.weekly-leaderboard-list{display:grid;gap:10px}
+.weekly-leader-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid #e9edf5;border-radius:13px;background:#fff}
+.weekly-leader-rank{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#f3f5fa;font-size:22px;flex:0 0 40px}
+.weekly-leader-info{min-width:0;flex:1;display:grid;gap:3px}
+.weekly-leader-name{font-weight:800;color:#172554}
+.weekly-leader-dept,.weekly-leader-time{font-size:12px;color:#64748b}
+.weekly-leader-time{white-space:nowrap}
+@media(max-width:520px){.weekly-leaderboard{padding:15px}.weekly-leader-row{padding:10px}.weekly-leader-rank{width:36px;height:36px;flex-basis:36px}.weekly-leader-time{font-size:11px}}
+</style>
+
 <section class="status-banner" id="uploadNotice" style="display:none"></section>
 <section id="successCard" class="card success-card" style="display:none"><div class="success-icon"><i class="fa-solid fa-circle-check"></i></div><div class="success-content"><span class="eyebrow">حالة التقرير</span><h2>تم استلام تقريرك بنجاح</h2><p>تم إرسال تقرير هذا الأسبوع إلى الإدارة بنجاح.</p><small>نراك في موعد رفع التقارير القادم.</small></div></section>
 <section class="dashboard-grid"><section id="uploadCard" class="card upload-card"><div class="card-heading"><div class="heading-icon upload-heading-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div><div><span class="eyebrow">المهمة الحالية</span><h2>رفع التقرير الأسبوعي</h2><p>اختر ملف التقرير بصيغة PDF ثم اضغط رفع التقرير.</p></div></div><input id="pdfFile" type="file" accept=".pdf,application/pdf" hidden><label class="upload-box" for="pdfFile"><div class="upload-icon"><i class="fa-solid fa-file-pdf"></i></div><h3>اسحب ملف التقرير هنا</h3><p>أو اضغط لاختيار ملف PDF من جهازك</p><span class="upload-hint"><i class="fa-solid fa-shield-halved"></i> PDF فقط</span><div id="selectedFile" class="selected-file">لم يتم اختيار أي ملف</div></label><div class="upload-footer"><div class="file-rule"><i class="fa-solid fa-circle-info"></i> تأكد من اختيار التقرير الصحيح قبل الرفع.</div><button id="uploadBtn" class="primary-btn" disabled><span id="uploadText"><i class="fa-solid fa-lock"></i> جاري التحقق</span></button></div></section>
