@@ -656,7 +656,45 @@ async function checkUploadPermission() {
 
 }
 
-/* ==========================\n   Weekly Top 3 Leaderboard\n========================== */\nasync function loadWeeklyLeaderboard() {\n    const list = document.getElementById("weeklyLeaderboardList");\n    const weekLabel = document.getElementById("leaderboardWeek");\n    if (!list) return;\n    const week = getMonthWeek(new Date());\n    if (weekLabel) weekLabel.textContent = "ترتيب جميع موظفي الجمعية — " + week;\n    try {\n        const result = await api("getWeeklyTopEmployees", { week });\n        if (!result || !result.success) throw new Error("Leaderboard unavailable");\n        if (!Array.isArray(result.leaders) || result.leaders.length === 0) {\n            list.innerHTML = '<div class="empty"><i class="fa-solid fa-trophy"></i><span>لم يتم رفع تقارير هذا الأسبوع بعد</span></div>'; return;\n        }\n        const medals = {1:"🥇",2:"🥈",3:"🥉"};\n        list.innerHTML = result.leaders.map(person => {\n            const date = new Date(String(person.uploadDate || "").replace(" ", "T"));\n            const time = isNaN(date.getTime()) ? "" : date.toLocaleString("ar-EG",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",hour12:true});\n            return '<div class="weekly-leader-row"><div class="weekly-leader-rank">'+(medals[person.rank]||"🏅")+'</div><div class="weekly-leader-info"><span class="weekly-leader-name">'+escapeHtml(person.name)+'</span><span class="weekly-leader-dept">'+escapeHtml(person.department||"")+'</span></div><span class="weekly-leader-time">'+escapeHtml(time)+'</span></div>';\n        }).join("");\n    } catch (error) { list.innerHTML = '<div class="empty"><i class="fa-solid fa-circle-exclamation"></i><span>تعذر تحميل ترتيب هذا الأسبوع</span></div>'; }\n}\n\n/* ==========================
+/* ==========================
+   Weekly Top 3 Leaderboard
+========================== */
+
+async function loadWeeklyLeaderboard() {
+    const list = document.getElementById("weeklyLeaderboardList");
+    const weekLabel = document.getElementById("leaderboardWeek");
+    if (!list) return;
+
+    const week = getMonthWeek(new Date());
+    if (weekLabel) weekLabel.textContent = "ترتيب جميع موظفي الجمعية — " + week;
+
+    try {
+        const result = await api("getWeeklyTopEmployees", { week });
+        if (!result || !result.success) throw new Error("Leaderboard unavailable");
+
+        if (!Array.isArray(result.leaders) || result.leaders.length === 0) {
+            list.innerHTML = '<div class="empty"><i class="fa-solid fa-trophy"></i><span>لا توجد مراكز معلنة لهذا الأسبوع حتى الآن</span></div>';
+            return;
+        }
+
+        const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+        list.innerHTML = result.leaders.map(person => {
+            const date = new Date(String(person.uploadDate || "").replace(" ", "T"));
+            const time = isNaN(date.getTime()) ? "" : date.toLocaleString("ar-EG", {
+                day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hour12: true
+            });
+            return '<div class="weekly-leader-row">' +
+                '<div class="weekly-leader-rank">' + (medals[person.rank] || "🏅") + '</div>' +
+                '<div class="weekly-leader-info"><span class="weekly-leader-name">' + escapeHtml(person.name) +
+                '</span><span class="weekly-leader-dept">' + escapeHtml(person.department || "") + '</span></div>' +
+                '<span class="weekly-leader-time">' + escapeHtml(time) + '</span></div>';
+        }).join("");
+    } catch (error) {
+        list.innerHTML = '<div class="empty"><i class="fa-solid fa-circle-info"></i><span>سيظهر ترتيب الأسبوع بعد تفعيل الخدمة</span></div>';
+    }
+}
+
+/* ==========================
    Previous Reports
 ========================== */
 
