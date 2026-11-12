@@ -180,108 +180,68 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePdf(); });
    Dashboard
 ========================== */
 async function dashboardPage(){
-    content.innerHTML=`<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i><span>جارٍ تحميل لوحة التحكم...</span></div>`;
-
+    content.innerHTML=`<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i><span>جارٍ تجهيز لوحة التحكم...</span></div>`;
     try{
         const [er,rr]=await Promise.all([api("getEmployees"),api("getReports")]);
         if(!er.success) throw new Error(er.message||"تعذر تحميل الموظفين");
         if(!rr.success) throw new Error(rr.message||"تعذر تحميل التقارير");
-
         employeesData=Array.isArray(er.employees)?er.employees:[];
         reportsData=Array.isArray(rr.reports)?rr.reports:[];
-
         const week=getCurrentWeek();
         const weekReports=reportsData.filter(r=>sameWeek(r.week,week));
-
-        /* الموظفون المطالبون بالرفع: موظف فقط وحالته ليست موقوفة. */
-        const reportingEmployees=employeesData
-            .filter(isReportingEmployee)
-            .map(e=>({...e,department:canonicalDepartment(e.department)}));
-
-        const managers=employeesData.filter(e=>
-            normalizeRole(e.role)==="manager" &&
-            !["inactive","موقوف","غير نشط","غيرنشط","متوقف","متوقفه","مفصول","محذوف"].includes(normalizeText(e.status))
-        );
-
-        /*
-         * تسجيل الرفع يتم للموظف نفسه وليس لمجرد وجود ID مشابه.
-         * عندما يرسل الباك إند اسم الموظف مع التقرير نطابق الاسم أيضًا،
-         * وهذا يمنع حالة تكرار ID من جعل موظف جديد يظهر وكأنه رفع.
-         */
+        const reportingEmployees=employeesData.filter(isReportingEmployee).map(e=>({...e,department:canonicalDepartment(e.department)}));
+        const managers=employeesData.filter(e=>normalizeRole(e.role)==="manager"&&!["inactive","موقوف","غير نشط","غيرنشط","متوقف","متوقفه","مفصول","محذوف"].includes(normalizeText(e.status)));
         const uploadedEmployeeKeys=new Set();
         reportingEmployees.forEach(employee=>{
-            const empId=employeeIdKey(employee.id);
-            const empName=normalizeText(employee.name);
-            if(!empId) return;
-
-            const hasReport=weekReports.some(report=>{
-                if(employeeIdKey(report.employeeId)!==empId) return false;
-                const reportName=normalizeText(report.employeeName);
-                if(reportName && empName && reportName!==empName) return false;
-                const reportDepartment=normalizeDepartment(report.department);
-                const empDepartment=normalizeDepartment(employee.department);
-                if(reportDepartment && empDepartment && reportDepartment!==empDepartment) return false;
-                return true;
+            const id=employeeIdKey(employee.id), name=normalizeText(employee.name);
+            const found=weekReports.some(report=>{
+                if(employeeIdKey(report.employeeId)!==id)return false;
+                const rn=normalizeText(report.employeeName);
+                if(rn&&name&&rn!==name)return false;
+                const rd=normalizeDepartment(report.department),ed=normalizeDepartment(employee.department);
+                return !(rd&&ed&&rd!==ed);
             });
-
-            if(hasReport) uploadedEmployeeKeys.add(`${empId}::${empName}`);
+            if(found)uploadedEmployeeKeys.add(id+"::"+name);
         });
-
-        const employeeUploaded=employee=>uploadedEmployeeKeys.has(
-            `${employeeIdKey(employee.id)}::${normalizeText(employee.name)}`
-        );
-
-        const uploaded=reportingEmployees.filter(employeeUploaded);
-        const missing=reportingEmployees.filter(e=>!employeeUploaded(e));
-
-        /* الأقسام الرسمية فقط، لكن لا نعرض القسم إلا إذا كان به موظف فعليًا. */
+        const employeeUploaded=e=>uploadedEmployeeKeys.has(employeeIdKey(e.id)+"::"+normalizeText(e.name));
+        const uploaded=reportingEmployees.filter(employeeUploaded),missing=reportingEmployees.filter(e=>!employeeUploaded(e));
         const departments=new Map();
-        reportingEmployees.forEach(e=>{
-            const name=canonicalDepartment(e.department);
-            if(!name) return;
-            const key=normalizeDepartment(name);
-            if(!departments.has(key)) departments.set(key,{name,employees:[]});
-            departments.get(key).employees.push(e);
-        });
-
-        const deptRows=[...departments.values()].map(dept=>{
-            const total=dept.employees.length;
-            const up=dept.employees.filter(employeeUploaded).length;
-            const miss=total-up;
-            const pct=total?Math.round(up/total*100):0;
-            return `<div class="dept-row">
-                <div class="dept-info"><strong>${esc(dept.name)}</strong><span>إجمالي ${total} موظف</span></div>
-                <div class="dept-progress-wrap"><div class="progress"><span style="width:${pct}%"></span></div><div class="dept-counts"><span class="uploaded-count">رفع: ${up}</span><span class="missing-count">لم يرفع: ${miss}</span></div></div>
-                <b>${pct}%</b>
-            </div>`;
-        }).join("");
-
-        const missingRows=missing.length?missing.map((e,i)=>`<div class="missing-employee"><div class="missing-number">${i+1}</div><div class="missing-person"><strong>${esc(e.name)}</strong><span>${esc(e.department||"بدون قسم")}</span></div><span class="missing-badge">لم يرفع</span></div>`).join(""):
-            `<div class="no-missing"><i class="fa-solid fa-circle-check"></i><div><strong>ممتاز! جميع الموظفين رفعوا التقارير</strong><span>لا يوجد موظفون متأخرون لهذا الأسبوع.</span></div></div>`;
-
+        reportingEmployees.forEach(e=>{const name=canonicalDepartment(e.department);if(!name)return;const key=normalizeDepartment(name);if(!departments.has(key))departments.set(key,{name,employees:[]});departments.get(key).employees.push(e);});
+        const deptData=[...departments.values()].map(d=>{const total=d.employees.length,up=d.employees.filter(employeeUploaded).length;return {...d,total,up,miss:total-up,pct:total?Math.round(up/total*100):0};});
+        const deptRows=deptData.map(d=>`<div class="new-dept-row"><div class="new-dept-label"><strong>${esc(d.name)}</strong><small>إجمالي ${d.total} موظف</small></div><div class="new-dept-track"><div class="new-progress"><span style="width:${d.pct}%"></span></div><small><b>${d.up} رفعوا</b><i>${d.miss} لم يرفعوا</i></small></div><strong class="new-dept-pct">${d.pct}%</strong></div>`).join("");
+        const pct=reportingEmployees.length?Math.round(uploaded.length/reportingEmployees.length*100):0;
+        const latest=[...reportsData].sort((a,b)=>new Date(b.uploadDate)-new Date(a.uploadDate)).slice(0,4);
+        const latestRows=latest.length?latest.map(r=>`<div class="new-latest-row"><span class="new-pdf-icon"><i class="fa-solid fa-file-pdf"></i></span><div class="new-latest-info"><strong>${esc(r.employeeName||"موظف")} — تقرير ${esc(r.department||"")}</strong><small>${esc(formatDate(r.uploadDate))}</small></div><button type="button" onclick="openPdf('${esc(r.url)}','${esc(r.employeeName||"عرض التقرير")}')"><i class="fa-solid fa-eye"></i></button></div>`).join(""):`<div class="empty-card small">لا توجد تقارير مرفوعة بعد.</div>`;
+        const topMap=new Map();
+        weekReports.forEach(r=>{const id=employeeIdKey(r.employeeId);if(!id)return;const prev=topMap.get(id);if(!prev||new Date(r.uploadDate)<new Date(prev.uploadDate))topMap.set(id,r);});
+        const top=[...topMap.values()].sort((a,b)=>new Date(a.uploadDate)-new Date(b.uploadDate)).slice(0,3);
+        const medals=["🥇","🥈","🥉"];
+        const topRows=top.length?top.map((r,i)=>`<div class="new-top-card rank-${i+1}"><span class="new-medal">${medals[i]}</span><strong>${esc(r.employeeName||"موظف")}</strong><small>${esc(r.department||"")}</small><b>${esc(formatDate(r.uploadDate))}</b></div>`).join(""):`<div class="new-empty-inline">لم يتم رفع تقارير هذا الأسبوع بعد.</div>`;
+        const missingRows=missing.length?missing.map((e,i)=>`<div class="missing-employee"><div class="missing-number">${i+1}</div><div class="missing-person"><strong>${esc(e.name)}</strong><span>${esc(e.department||"بدون قسم")}</span></div><span class="missing-badge">لم يرفع</span></div>`).join(""):`<div class="no-missing"><i class="fa-solid fa-circle-check"></i><div><strong>ممتاز! جميع الموظفين رفعوا التقارير</strong><span>لا يوجد موظفون متأخرون لهذا الأسبوع.</span></div></div>`;
         content.innerHTML=`
-        <div class="dashboard-intro"><div><span>نظرة عامة</span><h1>لوحة التحكم</h1><p>متابعة الموظفين والتقارير الأسبوعية من مكان واحد.</p></div><div class="intro-date"><i class="fa-regular fa-calendar"></i><span>${new Date().toLocaleDateString("ar-SA")}</span></div></div>
-        <div class="stats-grid">
-            <div class="stat-card"><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div><div><span>إجمالي الموظفين</span><strong>${reportingEmployees.length}</strong></div></div>
-            <div class="stat-card"><div class="stat-icon purple"><i class="fa-solid fa-user-tie"></i></div><div><span>مديرو الأقسام</span><strong>${managers.length}</strong></div></div>
-            <div class="stat-card"><div class="stat-icon green"><i class="fa-solid fa-file-circle-check"></i></div><div><span>رفعوا هذا الأسبوع</span><strong>${uploaded.length}</strong></div></div>
-            <div class="stat-card"><div class="stat-icon orange"><i class="fa-solid fa-clock"></i></div><div><span>لم يرفعوا</span><strong>${missing.length}</strong></div></div>
+        <div class="new-dashboard-intro"><div><span>نظرة عامة</span><h1>لوحة التحكم</h1><p>متابعة الموظفين والتقارير الأسبوعية من مكان واحد.</p></div><div class="new-date-chip"><i class="fa-regular fa-calendar"></i>${new Date().toLocaleDateString("ar-SA",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div></div>
+        <div class="new-stats-grid">
+          <div class="new-stat blue"><span class="new-stat-icon"><i class="fa-solid fa-users"></i></span><div><small>إجمالي الموظفين</small><strong>${reportingEmployees.length}</strong></div></div>
+          <div class="new-stat purple"><span class="new-stat-icon"><i class="fa-solid fa-user-tie"></i></span><div><small>مديرو الأقسام</small><strong>${managers.length}</strong></div></div>
+          <div class="new-stat green"><span class="new-stat-icon"><i class="fa-solid fa-circle-check"></i></span><div><small>رفعوا هذا الأسبوع</small><strong>${uploaded.length}</strong></div></div>
+          <div class="new-stat orange"><span class="new-stat-icon"><i class="fa-solid fa-hourglass-half"></i></span><div><small>لم يرفعوا</small><strong>${missing.length}</strong></div></div>
         </div>
-        <div class="dashboard-panels">
-            <section class="panel-card department-status-panel"><div class="panel-head"><div><span>متابعة الأقسام</span><h2>حالة التقارير هذا الأسبوع</h2></div><i class="fa-solid fa-chart-column"></i></div><div class="dept-list">${deptRows||'<div class="empty-card">لا يوجد موظفون مطالبون بالتقرير.</div>'}</div></section>
-            <section class="panel-card quick-actions"><div class="panel-head"><div><span>إجراءات سريعة</span><h2>الوصول السريع</h2></div><i class="fa-solid fa-bolt"></i></div>
-            <button onclick="loadPage('reports')"><i class="fa-solid fa-file-pdf"></i><span>عرض التقارير</span><small>بحث وفلترة التقارير</small></button>
-            <button onclick="loadPage('employees')"><i class="fa-solid fa-users"></i><span>إدارة الموظفين</span><small>إضافة وتعديل الموظفين</small></button>
-            <button class="missing-toggle" id="missingToggleBtn" type="button"><i class="fa-solid fa-user-clock"></i><span>الموظفون الذين لم يرفعوا</span><small>${missing.length} موظف لم يرفع تقرير هذا الأسبوع</small></button></section>
+        <div class="new-main-grid">
+          <section class="new-panel new-departments"><div class="new-panel-head"><div><small>متابعة الأقسام</small><h2>حالة التقارير هذا الأسبوع</h2></div><i class="fa-solid fa-chart-column"></i></div><div class="new-dept-list">${deptRows||'<div class="new-empty-inline">لا يوجد موظفون مطالبون بالتقرير.</div>'}</div></section>
+          <section class="new-side-stack">
+            <div class="new-panel new-quick"><div class="new-panel-head"><div><small>إجراءات سريعة</small><h2>الوصول السريع</h2></div><i class="fa-solid fa-bolt"></i></div><div class="new-quick-grid"><button onclick="loadPage('reports')"><i class="fa-solid fa-file-pdf"></i><span>عرض التقارير</span></button><button onclick="loadPage('employees')"><i class="fa-solid fa-user-plus"></i><span>إدارة الموظفين</span></button><button onclick="loadPage('settings')"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button></div></div>
+            <div class="new-panel new-latest"><div class="new-panel-head"><div><small>آخر التحديثات</small><h2>أحدث التقارير</h2></div><i class="fa-solid fa-file-circle-check"></i></div><div class="new-latest-list">${latestRows}</div><button class="new-text-link" onclick="loadPage('reports')">عرض جميع التقارير <i class="fa-solid fa-arrow-left"></i></button></div>
+          </section>
         </div>
-        <section class="missing-panel" id="missingPanel" hidden><div class="missing-panel-head"><div><span>المتابعة</span><h2>الموظفون الذين لم يرفعوا التقرير</h2><p>مديرو الأقسام لا يدخلون في هذه القائمة لأنهم لا يرفعون تقارير.</p></div><div class="missing-total"><strong>${missing.length}</strong><span>موظف</span></div></div><div class="missing-list">${missingRows}</div></section>`;
-
+        <div class="new-bottom-grid">
+          <section class="new-panel new-week-summary"><div class="new-panel-head"><div><small>ملخص الأداء</small><h2>ملخص الأسبوع</h2></div><i class="fa-solid fa-chart-pie"></i></div><div class="new-donut-wrap"><div class="new-donut" style="--progress:${pct}%"><div><strong>${pct}%</strong><small>نسبة الإنجاز</small></div></div><div class="new-legend"><div><i class="done"></i><span>رفعوا التقارير</span><b>${uploaded.length}</b></div><div><i class="pending"></i><span>لم يرفعوا</span><b>${missing.length}</b></div><div><i class="all"></i><span>الإجمالي</span><b>${reportingEmployees.length}</b></div></div></div></section>
+          <section class="new-panel new-leaderboard"><div class="new-panel-head"><div><small>إنجازات هذا الأسبوع</small><h2>أسرع 3 موظفين في رفع التقرير</h2></div><i class="fa-solid fa-trophy"></i></div><div class="new-top-list">${topRows}</div></section>
+        </div>
+        <section class="missing-panel new-missing-panel" id="missingPanel" hidden><div class="missing-panel-head"><div><span>المتابعة</span><h2>الموظفون الذين لم يرفعوا التقرير</h2><p>قائمة الموظفين المتأخرين عن رفع تقرير هذا الأسبوع.</p></div><div class="missing-total"><strong>${missing.length}</strong><span>موظف</span></div></div><div class="missing-list">${missingRows}</div></section>
+        <div class="new-dashboard-footer"><button class="new-missing-button" id="missingToggleBtn"><i class="fa-solid fa-user-clock"></i> عرض الموظفين الذين لم يرفعوا (${missing.length})</button><span>يتم تحديث البيانات عند فتح لوحة التحكم.</span></div>`;
         const btn=document.getElementById("missingToggleBtn"),panel=document.getElementById("missingPanel");
-        btn?.addEventListener("click",()=>{ const show=panel.hidden; panel.hidden=!show; btn.classList.toggle("active",show); });
-    }catch(err){
-        console.error(err);
-        content.innerHTML=`<div class="empty-card"><i class="fa-solid fa-triangle-exclamation"></i><h3>تعذر تحميل لوحة التحكم</h3><p>${esc(err.message||err)}</p></div>`;
-    }
+        btn?.addEventListener("click",()=>{const show=panel.hidden;panel.hidden=!show;btn.classList.toggle("active",show);btn.innerHTML=show?'<i class="fa-solid fa-eye-slash"></i> إخفاء قائمة المتأخرين':'<i class="fa-solid fa-user-clock"></i> عرض الموظفين الذين لم يرفعوا ('+missing.length+')';});
+    }catch(err){console.error(err);content.innerHTML=`<div class="empty-card"><i class="fa-solid fa-triangle-exclamation"></i><h3>تعذر تحميل لوحة التحكم</h3><p>${esc(err.message||err)}</p></div>`;}
 }
 
 /* ==========================
